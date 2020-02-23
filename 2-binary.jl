@@ -4,7 +4,7 @@ using JuMP
 
 include("data.jl")
 
-function lp_model(solver)
+function bin_model(solver)
 
     # Create the JuMP model object
 
@@ -12,8 +12,8 @@ function lp_model(solver)
 
     # Define decision variables
 
-    @variable(m, wind_builds[i in winds]) # in fraction of a wind site
-    @variable(m, pv_builds[i in pvs]) # in fraction of a pv site
+    @variable(m, wind_builds[i in winds], Bin) # whether to build wind site
+    @variable(m, pv_builds[i in pvs], Bin) # whether to build pv site
 
     @variable(m, wind_dispatch[t in timesteps]) # in MW
     @variable(m, pv_dispatch[t in timesteps]) # in MW
@@ -38,9 +38,6 @@ function lp_model(solver)
     )
 
     # Define constaints
-
-    @constraint(m, 0 .<= wind_builds .<= 1) # must build a valid fraction of a wind site
-    @constraint(m, 0 .<= pv_builds .<= 1) # must build a valid fraction of a pv site
 
     @constraint(m, powerbalance[t in timesteps], # balance supply and (inelastic) demand
         load[t] == wind_dispatch[t] + pv_dispatch[t] + droppedload[t])
